@@ -1,1 +1,10 @@
 /target
+
+msg.tmp
+*.tmp
+*.secret
+*.db
+
+wasm-runner/contracts/lib
+wasm-runner/contracts/out
+wasm-runner/contracts/cache
