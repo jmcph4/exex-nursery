@@ -15,6 +15,7 @@ reth-execution-types.workspace = true
 
 eyre.workspace = true
 futures.workspace = true
+alloy-sol-types.workspace = true
 
 [dev-dependencies]
 reth-exex-test-utils.workspace = true

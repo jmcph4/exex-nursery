@@ -664,6 +664,7 @@ version = "0.8.23"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "3b9bd22d0bba90e40f40c625c33d39afb7d62b22192476a2ce1dcf8409dce880"
 dependencies = [
+ "alloy-json-abi",
  "alloy-sol-macro-input",
  "const-hex",
  "heck",
@@ -682,12 +683,14 @@ version = "0.8.23"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "05ae4646e8123ec2fd10f9c22e361ffe4365c42811431829c2eabae528546bcc"
 dependencies = [
+ "alloy-json-abi",
  "const-hex",
  "dunce",
  "heck",
  "macro-string",
  "proc-macro2",
  "quote",
+ "serde_json",
  "syn 2.0.100",
  "syn-solidity",
 ]
@@ -9870,6 +9873,7 @@ dependencies = [
 name = "wasm-runner"
 version = "0.0.0"
 dependencies = [
+ "alloy-sol-types",
  "eyre",
  "futures",
  "reth",
