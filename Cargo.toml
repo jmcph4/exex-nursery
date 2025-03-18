@@ -1,0 +1,21 @@
+[workspace]
+members = ["wasm-runner"]
+resolver = "2"
+
+[workspace.package]
+version = "0.1.0"
+edition = "2024"
+license = "MIT"
+
+[workspace.dependencies]
+eyre = "0.6.12"
+reth-exex = { git = "https://github.com/paradigmxyz/reth", tag = "v1.2.2" }
+reth = { git = "https://github.com/paradigmxyz/reth", tag = "v1.2.2" }
+reth-node-api = { git = "https://github.com/paradigmxyz/reth", tag = "v1.2.2" }
+reth-node-ethereum = { git = "https://github.com/paradigmxyz/reth", tag = "v1.2.2" }
+reth-tracing = { git = "https://github.com/paradigmxyz/reth", tag = "v1.2.2" }
+reth-execution-types = { git = "https://github.com/paradigmxyz/reth", tag = "v1.2.2" }
+futures = "0.3.31"
+reth-exex-test-utils = { git = "https://github.com/paradigmxyz/reth", tag = "v1.2.2" }
+tokio = { version = "1.0", features = ["full"] }
+
