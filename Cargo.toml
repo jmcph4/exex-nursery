@@ -9,14 +9,14 @@ license = "MIT"
 
 [workspace.dependencies]
 eyre = "0.6.12"
-reth-exex = { git = "https://github.com/paradigmxyz/reth", tag = "v1.2.2" }
-reth = { git = "https://github.com/paradigmxyz/reth", tag = "v1.2.2" }
-reth-node-api = { git = "https://github.com/paradigmxyz/reth", tag = "v1.2.2" }
-reth-node-ethereum = { git = "https://github.com/paradigmxyz/reth", tag = "v1.2.2" }
-reth-tracing = { git = "https://github.com/paradigmxyz/reth", tag = "v1.2.2" }
-reth-execution-types = { git = "https://github.com/paradigmxyz/reth", tag = "v1.2.2" }
+reth-exex = { git = "https://github.com/paradigmxyz/reth", rev = "bbbc1c143432c22878e0428b90201ba625ef6187" }
+reth = { git = "https://github.com/paradigmxyz/reth", rev = "bbbc1c143432c22878e0428b90201ba625ef6187" }
+reth-node-api = { git = "https://github.com/paradigmxyz/reth", rev = "bbbc1c143432c22878e0428b90201ba625ef6187" }
+reth-node-ethereum = { git = "https://github.com/paradigmxyz/reth", rev = "bbbc1c143432c22878e0428b90201ba625ef6187" }
+reth-tracing = { git = "https://github.com/paradigmxyz/reth", rev = "bbbc1c143432c22878e0428b90201ba625ef6187" }
+reth-execution-types = { git = "https://github.com/paradigmxyz/reth", rev = "bbbc1c143432c22878e0428b90201ba625ef6187" }
 futures = "0.3.31"
-reth-exex-test-utils = { git = "https://github.com/paradigmxyz/reth", tag = "v1.2.2" }
+reth-exex-test-utils = { git = "https://github.com/paradigmxyz/reth", rev = "bbbc1c143432c22878e0428b90201ba625ef6187" }
 tokio = { version = "1.0", features = ["full"] }
 alloy-sol-types = { version = "0.8.23", features = ["json"] }
 

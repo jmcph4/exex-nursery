@@ -1,12 +1,14 @@
+use alloy_consensus::TxReceipt;
+use alloy_primitives::{Address, Log, address};
 use alloy_sol_types::sol;
 use futures::{Future, TryStreamExt};
-use reth::primitives::Log;
 use reth_exex::{ExExContext, ExExEvent, ExExNotification};
 use reth_node_api::FullNodeComponents;
 use reth_node_ethereum::EthereumNode;
 use reth_tracing::tracing::info;
 
-const BYTECODE_REGISTRY_ADDRESS: &str = "";
+const BYTECODE_REGISTRY_ADDRESS: Address =
+    address!("d8da6bf26964af9d7eed9e03e53415d37aa96045");
 
 sol!(BytecodeRegistryContract, "registry_abi.json");
 
@@ -39,15 +41,20 @@ async fn exex<Node: FullNodeComponents>(
         match &notification {
             ExExNotification::ChainCommitted { new } => {
                 info!(committed_chain = ?new.range(), "Received commit");
-                new.blocks_and_receipts()
-                    .map(|(_, receipt)| receipt)
+                new.block_receipts_iter()
+                    .flatten()
                     .flat_map(|receipt| {
-                        receipt.logs.iter().filter(|log| {
-                            log.address == BYTECODE_REGISTRY_ADDRESS
-                        })
+                        receipt
+                            .logs()
+                            .iter()
+                            .filter(|log| {
+                                log.address == BYTECODE_REGISTRY_ADDRESS
+                            })
+                            .collect::<Vec<_>>()
                     })
-                    .map(|log| ExecutionRequestEvent::decode_raw_log(log))
-                    .for_each(|ev| on_req(ev));
+                    .try_for_each(|log| {
+                        on_req(&ExecutionRequestEvent::decode_raw_log(log)?)
+                    })?;
             }
             ExExNotification::ChainReorged { old, new } => {
                 info!(from_chain = ?old.range(), to_chain = ?new.range(), "Received reorg");

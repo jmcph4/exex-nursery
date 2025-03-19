@@ -16,6 +16,8 @@ reth-execution-types.workspace = true
 eyre.workspace = true
 futures.workspace = true
 alloy-sol-types.workspace = true
+alloy-consensus = "0.12.6"
+alloy-primitives = "0.8.23"
 
 [dev-dependencies]
 reth-exex-test-utils.workspace = true
