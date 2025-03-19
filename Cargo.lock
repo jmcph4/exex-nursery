@@ -10626,6 +10626,7 @@ dependencies = [
  "alloy-sol-types",
  "eyre",
  "futures",
+ "hex",
  "reth",
  "reth-execution-types",
  "reth-exex",

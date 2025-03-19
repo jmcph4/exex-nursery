@@ -29,7 +29,7 @@ impl ExecutionRequestEvent {
 fn on_req(req: &ExecutionRequestEvent) -> eyre::Result<()> {
     let engine = Engine::default();
     let mut store = Store::new(&engine, ());
-    let module = Module::new(&engine, &req.code)
+    let module = Module::from_binary(&engine, &req.code)
         .map_err(|e| eyre!("WASM error: {e:?}"))?;
     let linker = Linker::new(&engine);
     let instance = linker
@@ -107,9 +107,12 @@ fn main() -> eyre::Result<()> {
 
 #[cfg(test)]
 mod tests {
+    use super::*;
+
     use reth_execution_types::{Chain, ExecutionOutcome};
     use reth_exex_test_utils::{PollOnce, test_exex_context};
     use std::pin::pin;
+    use wasmtime::CodeBuilder;
 
     #[tokio::test]
     async fn test_exex() -> eyre::Result<()> {
@@ -128,5 +131,35 @@ mod tests {
         handle.assert_event_finished_height((head.number, head.hash).into())?;
 
         Ok(())
+    }
+
+    #[test]
+    fn test_wasm_code_execution_success() {
+        let source = r#"
+(module
+  (import "wasi_snapshot_preview1" "fd_write" (func $fd_write (param i32 i32 i32 i32) (result i32)))
+  (memory (export "memory") 1)
+  (data (i32.const 8) "Hello, borker!\n")
+
+  (func $main (export "_start")
+    (i32.store (i32.const 0) (i32.const 8))
+    (i32.store (i32.const 4) (i32.const 14))
+    (call $fd_write (i32.const 1) (i32.const 0) (i32.const 1) (i32.const 0))
+    drop
+  )
+)
+            "#;
+        let code = wat2wasm(&source).unwrap();
+        let actual_res = on_req(&ExecutionRequestEvent { code });
+        dbg!(&actual_res);
+        assert!(actual_res.is_ok());
+    }
+
+    fn wat2wasm(source: &str) -> eyre::Result<Vec<u8>> {
+        Ok(CodeBuilder::new(&Engine::default())
+            .wasm_binary_or_text(&source.as_bytes(), None)
+            .map_err(|e| eyre!("WASM Compilation Error: {e:?}"))?
+            .compile_module_serialized()
+            .map_err(|e| eyre!("WASM Compilation Error: {e:?}"))?)
     }
 }
