@@ -1,11 +1,13 @@
 use alloy_consensus::TxReceipt;
 use alloy_primitives::{Address, Log, address};
 use alloy_sol_types::sol;
+use eyre::eyre;
 use futures::{Future, TryStreamExt};
 use reth_exex::{ExExContext, ExExEvent, ExExNotification};
 use reth_node_api::FullNodeComponents;
 use reth_node_ethereum::EthereumNode;
 use reth_tracing::tracing::info;
+use wasmtime::{Engine, Linker, Module, Store};
 
 const BYTECODE_REGISTRY_ADDRESS: Address =
     address!("d8da6bf26964af9d7eed9e03e53415d37aa96045");
@@ -25,6 +27,21 @@ impl ExecutionRequestEvent {
 }
 
 fn on_req(req: &ExecutionRequestEvent) -> eyre::Result<()> {
+    let engine = Engine::default();
+    let mut store = Store::new(&engine, ());
+    let module = Module::new(&engine, &req.code)
+        .map_err(|e| eyre!("WASM error: {e:?}"))?;
+    let linker = Linker::new(&engine);
+    let instance = linker
+        .instantiate(&mut store, &module)
+        .map_err(|e| eyre!("WASM error: {e:?}"))?;
+
+    if let Ok(start) = instance.get_typed_func::<(), ()>(&mut store, "_start") {
+        start
+            .call(&mut store, ())
+            .map_err(|e| eyre!("WASM Error: {e:?}"))?;
+    }
+
     Ok(())
 }
 
