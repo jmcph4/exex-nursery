@@ -19,6 +19,7 @@ alloy-sol-types.workspace = true
 alloy-consensus = "0.12.6"
 alloy-primitives = "0.8.23"
 wasmtime = "30.0.2"
+wasmtime-wasi = "30.0.2"
 
 [dev-dependencies]
 reth-exex-test-utils.workspace = true

@@ -8,6 +8,9 @@ use reth_node_api::FullNodeComponents;
 use reth_node_ethereum::EthereumNode;
 use reth_tracing::tracing::info;
 use wasmtime::{Engine, Linker, Module, Store};
+use wasmtime_wasi::{
+    IoView, WasiCtx, WasiCtxBuilder, WasiView, preview1::WasiP1Ctx,
+};
 
 const BYTECODE_REGISTRY_ADDRESS: Address =
     address!("d8da6bf26964af9d7eed9e03e53415d37aa96045");
@@ -26,12 +29,41 @@ impl ExecutionRequestEvent {
     }
 }
 
+struct WasiRuntimeContext(pub WasiP1Ctx);
+
+impl IoView for WasiRuntimeContext {
+    fn table(&mut self) -> &mut wasmtime_wasi::ResourceTable {
+        todo!()
+    }
+}
+
+impl WasiView for WasiRuntimeContext {
+    fn ctx(&mut self) -> &mut WasiCtx {
+        todo!()
+    }
+}
+
+impl WasiRuntimeContext {
+    pub fn new() -> Self {
+        Self(WasiCtxBuilder::new().build_p1())
+    }
+
+    pub fn ctx_mut(&mut self) -> &mut WasiP1Ctx {
+        &mut self.0
+    }
+}
+
 fn on_req(req: &ExecutionRequestEvent) -> eyre::Result<()> {
     let engine = Engine::default();
-    let mut store = Store::new(&engine, ());
+    let mut store: Store<WasiRuntimeContext> =
+        Store::new(&engine, WasiRuntimeContext::new());
     let module = Module::from_binary(&engine, &req.code)
         .map_err(|e| eyre!("WASM error: {e:?}"))?;
-    let linker = Linker::new(&engine);
+    let mut linker: Linker<WasiRuntimeContext> = Linker::new(&engine);
+    wasmtime_wasi::preview1::add_to_linker_sync(&mut linker, |ctx| {
+        ctx.ctx_mut()
+    })
+    .map_err(|e| eyre!("WASM error: {e:?}"))?;
     let instance = linker
         .instantiate(&mut store, &module)
         .map_err(|e| eyre!("WASM error: {e:?}"))?;
