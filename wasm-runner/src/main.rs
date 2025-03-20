@@ -112,7 +112,6 @@ mod tests {
     use reth_execution_types::{Chain, ExecutionOutcome};
     use reth_exex_test_utils::{PollOnce, test_exex_context};
     use std::pin::pin;
-    use wasmtime::CodeBuilder;
 
     #[tokio::test]
     async fn test_exex() -> eyre::Result<()> {
@@ -156,10 +155,6 @@ mod tests {
     }
 
     fn wat2wasm(source: &str) -> eyre::Result<Vec<u8>> {
-        Ok(CodeBuilder::new(&Engine::default())
-            .wasm_binary_or_text(&source.as_bytes(), None)
-            .map_err(|e| eyre!("WASM Compilation Error: {e:?}"))?
-            .compile_module_serialized()
-            .map_err(|e| eyre!("WASM Compilation Error: {e:?}"))?)
+        Ok(wat::parse_str(source)?)
     }
 }

@@ -24,3 +24,4 @@ wasmtime = "30.0.2"
 reth-exex-test-utils.workspace = true
 tokio.workspace = true
 hex.workspace = true
+wat = "1.227.1"

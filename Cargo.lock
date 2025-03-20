@@ -10636,6 +10636,7 @@ dependencies = [
  "reth-tracing",
  "tokio",
  "wasmtime",
+ "wat",
 ]
 
 [[package]]
