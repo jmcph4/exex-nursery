@@ -1,6 +1,9 @@
+use std::str::FromStr;
+
 use alloy_consensus::TxReceipt;
-use alloy_primitives::{Address, Log, address};
+use alloy_primitives::{Address, Log};
 use alloy_sol_types::sol;
+use clap::Parser;
 use eyre::eyre;
 use futures::{Future, TryStreamExt};
 use reth_exex::{ExExContext, ExExEvent, ExExNotification};
@@ -12,8 +15,8 @@ use wasmtime_wasi::{
     IoView, WasiCtx, WasiCtxBuilder, WasiView, preview1::WasiP1Ctx,
 };
 
-const BYTECODE_REGISTRY_ADDRESS: Address =
-    address!("d8da6bf26964af9d7eed9e03e53415d37aa96045");
+const DEFAULT_BYTECODE_REGISTRY_ADDRESS: &str =
+    "d8da6bf26964af9d7eed9e03e53415d37aa96045";
 
 sol!(BytecodeRegistryContract, "registry_abi.json");
 
@@ -97,7 +100,12 @@ async fn exex<Node: FullNodeComponents>(
                             .logs()
                             .iter()
                             .filter(|log| {
-                                log.address == BYTECODE_REGISTRY_ADDRESS
+                                /* SAFETY(jmcph4): we control this constant */
+                                log.address
+                                    == Address::from_str(
+                                        DEFAULT_BYTECODE_REGISTRY_ADDRESS,
+                                    )
+                                    .unwrap()
                             })
                             .collect::<Vec<_>>()
                     })
@@ -123,8 +131,31 @@ async fn exex<Node: FullNodeComponents>(
     Ok(())
 }
 
+const DEFAULT_RETH_ARGS: [&str; 2] = ["reth", "node"];
+const DEFAULT_TESTNET: &str = "hoodi";
+
+/// Executes arbitrary WebAssembly programs from Ethereum
+#[derive(Clone, Debug, Parser)]
+#[clap(author, version, about)]
+struct Opts {
+    #[clap(short, long, action)]
+    dev: bool,
+    #[clap(default_value = DEFAULT_BYTECODE_REGISTRY_ADDRESS)]
+    bytecode_registry: Address,
+}
+
 fn main() -> eyre::Result<()> {
-    reth::cli::Cli::try_parse_args_from(["reth", "node"])?.run(
+    let opts = Opts::parse();
+
+    let reth_args = if opts.dev {
+        let mut xs = DEFAULT_RETH_ARGS.to_vec();
+        xs.extend_from_slice(&["--chain", DEFAULT_TESTNET]);
+        xs
+    } else {
+        DEFAULT_RETH_ARGS.to_vec()
+    };
+
+    reth::cli::Cli::try_parse_args_from(reth_args)?.run(
         |builder, _| async move {
             let handle = builder
                 .node(EthereumNode::default())
